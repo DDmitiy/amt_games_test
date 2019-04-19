@@ -12,7 +12,7 @@ Test assignment for AMT games
     - 200 игроков:
         - id = uuid4()
         - name = any
-        - power = random.ranint(1, 1000)
+        - power = random.randint(1, 1000)
         - medals = 1000
         - money = 0
 
