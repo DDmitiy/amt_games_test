@@ -2,6 +2,9 @@ from cerberus import Validator
 
 
 async def validate(data, schema):
+    """
+    Обертка для валидотора.
+    """
     v = Validator()
 
     if v.validate(data, schema) is False:
