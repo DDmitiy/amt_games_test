@@ -56,7 +56,7 @@ async def main():
                     tournament_started = False
                     break
 
-    await asyncio.sleep(2)
+    await asyncio.sleep(DELAY)
     resp = requests.get(BASE_URL + 'tournament/results/').json()
     print(f"""
     ___________________________
