@@ -14,7 +14,7 @@ async def init_pg(app):
         port=os.getenv('POSTGRES_PORT'),
         minsize=1,
         maxsize=5,
-        loop=app.loop)
+    )
     config['db'] = engine
     setattr(app, 'db', engine)
 

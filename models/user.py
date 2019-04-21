@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 from uuid import uuid4
 
 import sqlalchemy as sa
@@ -6,6 +7,7 @@ from sqlalchemy import Column, Integer, String, text
 from sqlalchemy.ext.declarative import declarative_base
 
 from config import config
+from config.config import TOURNAMENT_REWARDS
 
 Base = declarative_base()
 
@@ -19,6 +21,9 @@ def gen_uuid4():
 
 
 class User(Base):
+    """
+    Модель игрока.
+    """
     __tablename__ = 'users'
     id = Column(String, primary_key=True, nullable=False, default=gen_uuid4)
     name = Column(String, nullable=True, unique=True)
@@ -108,9 +113,10 @@ class User(Base):
         return bool(user)
 
     @staticmethod
-    async def get_user_by_name(name: str) -> dict:
+    async def get_user_by_name(name: str) -> Optional[dict]:
         async with config['db'].acquire() as conn:
-            query = sa.select([sa_user.c.id]) \
+            query = sa.select([sa_user.c.id,
+                               sa_user.c.name]) \
                 .select_from(sa_user) \
                 .where(sa_user.c.name == name)
 
@@ -162,6 +168,20 @@ class User(Base):
                 field=field
             ))
             await conn.execute(query)
+
+    @staticmethod
+    async def get_last_prize_winners_of_group() -> list:
+        async with config['db'].acquire() as conn:
+            query = text("""
+                SELECT id, name, money, medals, group_num, rank
+                FROM (
+                    SELECT id, name, money, medals, group_num, ROW_NUMBER()
+                        OVER (PARTITION BY group_num ORDER BY medals DESC, name) AS rank
+                    FROM users
+                ) rs WHERE rank <= {rewards_num}
+            """.format(rewards_num=len(TOURNAMENT_REWARDS)))
+            prize_winners = list(map(lambda x: dict(x), await conn.execute(query)))
+        return prize_winners
 
 
 sa_user = User.__table__
