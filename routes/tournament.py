@@ -28,8 +28,8 @@ def init(app):
 
 
 async def start_tournament(request: Request) -> Response:
-    # if await is_tournament_start():
-    #     return json_error_400('tournament_already_running')
+    if await is_tournament_start():
+        return json_error_400('tournament_already_running')
     users = await User.get_all_users_order_by('power')
     users_count = len(users)
     groups = list()
